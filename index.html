@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Brandon García — Security & Dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c10;
+  --bg2:#0d1117;
+  --bg3:#111820;
+  --surface:#141b24;
+  --surface2:#1a2535;
+  --text:#e8edf2;
+  --muted:#7a8fa6;
+  --faint:#3d5068;
+  --green:#00e5a0;
+  --green2:#00b87a;
+  --green-glow:rgba(0,229,160,0.15);
+  --green-dim:rgba(0,229,160,0.06);
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.1);
+  --border-green:rgba(0,229,160,0.25);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Syne',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--faint);border-radius:2px}
+
+/* ── Canvas bg ── */
+#canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.35}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:1.1rem 0;
+  background:rgba(8,12,16,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner{
+  max-width:1100px;margin:0 auto;padding:0 2.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{
+  font-family:'Fira Code',monospace;
+  font-size:14px;color:var(--green);
+  text-decoration:none;letter-spacing:0.05em;
+}
+.nav-logo span{color:var(--muted)}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{
+  font-size:13px;font-weight:500;letter-spacing:0.06em;
+  color:var(--muted);text-decoration:none;
+  text-transform:uppercase;
+  transition:color .2s;
+}
+.nav-links a:hover{color:var(--green)}
+.nav-cta{
+  font-family:'Fira Code',monospace;
+  font-size:12px;padding:8px 20px;
+  border:1px solid var(--border-green);
+  border-radius:4px;color:var(--green);
+  text-decoration:none;
+  transition:background .2s,box-shadow .2s;
+}
+.nav-cta:hover{background:var(--green-dim);box-shadow:0 0 20px var(--green-glow)}
+
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:8rem 0 5rem;
+}
+.hero-inner{
+  max-width:1100px;margin:0 auto;padding:0 2.5rem;
+  width:100%;
+}
+.hero-pre{
+  font-family:'Fira Code',monospace;
+  font-size:13px;color:var(--green);
+  letter-spacing:0.08em;margin-bottom:1.5rem;
+  display:flex;align-items:center;gap:10px;
+  opacity:0;animation:fadeUp .6s .2s forwards;
+}
+.hero-pre::before{
+  content:'';display:block;
+  width:40px;height:1px;background:var(--green);
+}
+.hero-h1{
+  font-size:clamp(52px,9vw,96px);
+  font-weight:800;line-height:0.95;
+  letter-spacing:-0.03em;
+  margin-bottom:0.15em;
+  opacity:0;animation:fadeUp .7s .35s forwards;
+}
+.hero-h1 .line2{
+  color:transparent;
+  -webkit-text-stroke:1px var(--faint);
+}
+.hero-h1 .dot{color:var(--green)}
+.hero-sub{
+  font-size:clamp(15px,2vw,18px);
+  color:var(--muted);font-weight:400;
+  max-width:580px;line-height:1.75;
+  margin:2rem 0 3rem;
+  opacity:0;animation:fadeUp .7s .5s forwards;
+}
+.hero-sub strong{color:var(--text);font-weight:600}
+.hero-actions{
+  display:flex;gap:1rem;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .7s .65s forwards;
+}
+.btn{
+  font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:600;
+  letter-spacing:0.08em;text-transform:uppercase;
+  padding:14px 32px;border-radius:4px;
+  text-decoration:none;
+  display:inline-flex;align-items:center;gap:10px;
+  transition:all .25s;
+  cursor:pointer;border:none;
+}
+.btn-primary{
+  background:var(--green);color:#080c10;
+}
+.btn-primary:hover{background:#00ffb3;box-shadow:0 0 30px rgba(0,229,160,0.4);transform:translateY(-2px)}
+.btn-outline{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border2);
+}
+.btn-outline:hover{border-color:var(--border-green);color:var(--green);transform:translateY(-2px)}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+
+/* hero stats */
+.hero-stats{
+  display:flex;gap:3rem;margin-top:4rem;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .7s .8s forwards;
+}
+.stat-item{}
+.stat-num{
+  font-size:36px;font-weight:800;color:var(--green);
+  letter-spacing:-0.02em;line-height:1;
+  margin-bottom:4px;
+}
+.stat-label{font-size:12px;color:var(--faint);letter-spacing:0.08em;text-transform:uppercase}
+
+/* scroll indicator */
+.scroll-hint{
+  position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:fadeIn 1s 1.5s forwards;
+}
+.scroll-hint span{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--faint)}
+.scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--green),transparent);animation:scrollPulse 2s infinite}
+
+/* ── Sections shared ── */
+.section{
+  position:relative;z-index:1;
+  padding:6rem 0;
+  border-top:1px solid var(--border);
+}
+.section-inner{max-width:1100px;margin:0 auto;padding:0 2.5rem}
+.section-tag{
+  font-family:'Fira Code',monospace;
+  font-size:12px;color:var(--green);
+  letter-spacing:0.1em;margin-bottom:1rem;
+  display:flex;align-items:center;gap:12px;
+}
+.section-tag::before{content:'//';color:var(--faint)}
+.section-h2{
+  font-size:clamp(32px,5vw,48px);
+  font-weight:800;letter-spacing:-0.02em;
+  line-height:1.1;margin-bottom:1rem;
+}
+.section-h2 em{
+  font-style:normal;
+  color:transparent;
+  -webkit-text-stroke:1px var(--faint);
+}
+
+/* ── About ── */
+.about-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:4rem;align-items:start;margin-top:3.5rem;
+}
+.about-text{
+  font-size:16px;color:var(--muted);
+  line-height:1.85;font-weight:400;
+}
+.about-text p{margin-bottom:1.2rem}
+.about-text strong{color:var(--text);font-weight:600}
+.about-text a{color:var(--green);text-decoration:none}
+
+.terminal{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  overflow:hidden;
+  font-family:'Fira Code',monospace;
+}
+.terminal-bar{
+  background:var(--surface);padding:12px 16px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--border);
+}
+.dot-r{width:12px;height:12px;border-radius:50%;background:#ff5f57}
+.dot-y{width:12px;height:12px;border-radius:50%;background:#ffbd2e}
+.dot-g{width:12px;height:12px;border-radius:50%;background:#28c840}
+.terminal-title{font-size:11px;color:var(--faint);margin-left:auto;margin-right:auto}
+.terminal-body{padding:1.5rem;font-size:13px;line-height:2}
+.t-comment{color:var(--faint)}
+.t-key{color:#79aaff}
+.t-str{color:#f1a860}
+.t-val{color:var(--green)}
+.t-punct{color:var(--muted)}
+
+/* ── Skills ── */
+.skills-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1.5rem;margin-top:3.5rem;
+}
+.skill-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;padding:2rem;
+  transition:border-color .3s,transform .3s,background .3s;
+  position:relative;overflow:hidden;
+}
+.skill-card::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--green-dim),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.skill-card:hover{
+  border-color:var(--border-green);
+  transform:translateY(-4px);
+}
+.skill-card:hover::before{opacity:1}
+.skill-icon{
+  width:44px;height:44px;border-radius:8px;
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.25rem;font-size:20px;
+  position:relative;z-index:1;
+}
+.skill-name{
+  font-size:15px;font-weight:700;
+  margin-bottom:0.75rem;letter-spacing:-0.01em;
+  position:relative;z-index:1;
+}
+.skill-tags{display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:1}
+.skill-tag{
+  font-family:'Fira Code',monospace;
+  font-size:11px;padding:3px 10px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:3px;color:var(--muted);
+}
+
+/* ── Projects ── */
+.projects-list{
+  display:flex;flex-direction:column;gap:1.5rem;
+  margin-top:3.5rem;
+}
+.project-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  display:grid;grid-template-columns:1fr auto;
+  gap:2rem;align-items:center;
+  padding:2.5rem;
+  text-decoration:none;color:inherit;
+  transition:border-color .3s,transform .3s,background .3s;
+  position:relative;overflow:hidden;
+}
+.project-card::after{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--green);
+  transform:scaleY(0);transform-origin:bottom;
+  transition:transform .3s;
+}
+.project-card:hover{
+  border-color:var(--border-green);
+  transform:translateX(4px);
+  background:var(--surface2);
+}
+.project-card:hover::after{transform:scaleY(1)}
+.project-index{
+  font-family:'Fira Code',monospace;
+  font-size:12px;color:var(--green);
+  margin-bottom:0.5rem;letter-spacing:0.1em;
+}
+.project-title{font-size:22px;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.75rem}
+.project-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;max-width:600px}
+.project-tech{display:flex;gap:8px;flex-wrap:wrap}
+.tech-badge{
+  font-family:'Fira Code',monospace;
+  font-size:11px;padding:4px 12px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:3px;color:var(--green);
+}
+.project-arrow{
+  width:48px;height:48px;
+  border:1px solid var(--border);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);flex-shrink:0;
+  transition:border-color .3s,color .3s,background .3s;
+}
+.project-card:hover .project-arrow{
+  border-color:var(--green);color:var(--green);
+  background:var(--green-dim);
+}
+.project-arrow svg{width:18px;height:18px}
+.project-status{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'Fira Code',monospace;
+  font-size:11px;color:var(--green);margin-top:1rem;
+}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:pulse 2s infinite;
+}
+
+/* ── CTA ── */
+.cta-section{
+  position:relative;z-index:1;
+  padding:6rem 0;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+}
+.cta-inner{
+  max-width:1100px;margin:0 auto;padding:0 2.5rem;
+  text-align:center;
+}
+.cta-h2{
+  font-size:clamp(36px,6vw,64px);
+  font-weight:800;letter-spacing:-0.03em;
+  line-height:1.05;margin-bottom:1.5rem;
+}
+.cta-h2 .green{color:var(--green)}
+.cta-sub{
+  font-size:16px;color:var(--muted);max-width:500px;
+  margin:0 auto 3rem;line-height:1.75;
+}
+.cta-links{
+  display:flex;justify-content:center;
+  gap:1rem;flex-wrap:wrap;
+}
+
+/* ── Footer ── */
+footer{
+  position:relative;z-index:1;
+  padding:2rem 0;
+  border-top:1px solid var(--border);
+  background:var(--bg);
+}
+.footer-inner{
+  max-width:1100px;margin:0 auto;padding:0 2.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;
+}
+.footer-copy{
+  font-family:'Fira Code',monospace;
+  font-size:12px;color:var(--faint);
+}
+.footer-nav{display:flex;gap:2rem;list-style:none}
+.footer-nav a{
+  font-size:12px;color:var(--faint);
+  text-decoration:none;
+  transition:color .2s;
+}
+.footer-nav a:hover{color:var(--green)}
+
+/* ── Scroll reveal ── */
+.reveal{
+  opacity:0;transform:translateY(24px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── Keyframes ── */
+@keyframes fadeUp{
+  to{opacity:1;transform:translateY(0)}
+  from{opacity:0;transform:translateY(20px)}
+}
+@keyframes fadeIn{to{opacity:1}from{opacity:0}}
+@keyframes scrollPulse{
+  0%,100%{opacity:1}50%{opacity:0.3}
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 8px var(--green)}
+  50%{box-shadow:0 0 16px var(--green),0 0 4px var(--green)}
+}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .about-grid{grid-template-columns:1fr}
+  .project-card{grid-template-columns:1fr}
+  .project-arrow{display:none}
+  .hero-stats{gap:2rem}
+}
+@media(max-width:480px){
+  .nav-cta{display:none}
+  .section-inner{padding:0 1.25rem}
+  .hero-inner{padding:0 1.25rem}
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><span>&lt;</span>BG<span>/&gt;</span></a>
+    <ul class="nav-links">
+      <li><a href="#sobre-mi">Sobre mí</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#proyectos">Proyectos</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a href="https://github.com/Brandon220" target="_blank" class="nav-cta">GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-pre">Disponible para proyectos</p>
+    <h1 class="hero-h1">
+      Brandon<br>
+      <span class="line2">García<span class="dot">.</span></span>
+    </h1>
+    <p class="hero-sub">
+      Especialista en <strong>Ciberseguridad</strong> y desarrollador web. Construyo soluciones que <strong>protegen sistemas</strong> y dan vida a ideas — desde apps de automatización hasta herramientas seguras para negocios.
+    </p>
+    <div class="hero-actions">
+      <a href="#proyectos" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
+        Ver proyectos
+      </a>
+      <a href="https://github.com/Brandon220" target="_blank" class="btn btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">01+</div>
+        <div class="stat-label">Proyectos publicados</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">2+</div>
+        <div class="stat-label">Años en tech</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Ganas de aprender</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- SOBRE MÍ -->
+<section class="section" id="sobre-mi">
+  <div class="section-inner">
+    <p class="section-tag reveal">about_me</p>
+    <h2 class="section-h2 reveal">Seguridad <em>&</em><br>Desarrollo.</h2>
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p>Soy Brandon García, desarrollador de software con <strong>especialización en ciberseguridad</strong>. Me apasiona entender cómo funcionan los sistemas a fondo — tanto para protegerlos como para construirlos desde cero.</p>
+        <p>Combino una mentalidad de seguridad con habilidades de desarrollo web para crear aplicaciones que no solo funcionan bien, sino que están <strong>construidas pensando en la protección</strong> de los datos y los usuarios.</p>
+        <p>Me encanta tomar las ideas de los clientes y transformarlas en productos reales. Cada proyecto es una oportunidad de aprender algo nuevo y mejorar.</p>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="dot-r"></span>
+          <span class="dot-y"></span>
+          <span class="dot-g"></span>
+          <span class="terminal-title">brandon.json</span>
+        </div>
+        <div class="terminal-body">
+          <span class="t-punct">{</span><br>
+          &nbsp;&nbsp;<span class="t-key">"nombre"</span><span class="t-punct">:</span> <span class="t-str">"Brandon García"</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;<span class="t-key">"rol"</span><span class="t-punct">:</span> <span class="t-str">"Dev &amp; Security"</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;<span class="t-key">"ubicacion"</span><span class="t-punct">:</span> <span class="t-str">"Costa Rica 🇨🇷"</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;<span class="t-key">"pasion"</span><span class="t-punct">:</span> <span class="t-str">"Ciberseguridad"</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;<span class="t-key">"disponible"</span><span class="t-punct">:</span> <span class="t-val">true</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;<span class="t-key">"github"</span><span class="t-punct">:</span> <span class="t-str">"Brandon220"</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;<span class="t-key">"objetivo"</span><span class="t-punct">:</span> [<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Proteger sistemas"</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Construir productos"</span><span class="t-punct">,</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Aprender siempre"</span><br>
+          &nbsp;&nbsp;]<br>
+          <span class="t-punct">}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="section" id="skills">
+  <div class="section-inner">
+    <p class="section-tag reveal">skills</p>
+    <h2 class="section-h2 reveal">Lo que <em>sé</em><br>hacer.</h2>
+    <div class="skills-grid">
+      <div class="skill-card reveal">
+        <div class="skill-icon">🔐</div>
+        <p class="skill-name">Ciberseguridad</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Análisis</span>
+          <span class="skill-tag">OWASP</span>
+          <span class="skill-tag">Vulnerabilidades</span>
+          <span class="skill-tag">Hardening</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">🌐</div>
+        <p class="skill-name">Frontend Dev</p>
+        <div class="skill-tags">
+          <span class="skill-tag">HTML5</span>
+          <span class="skill-tag">CSS3</span>
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">Responsive</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">⚙️</div>
+        <p class="skill-name">Automatización</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Procesos</span>
+          <span class="skill-tag">Sistemas</span>
+          <span class="skill-tag">Lógica</span>
+          <span class="skill-tag">Eficiencia</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">🛠️</div>
+        <p class="skill-name">Herramientas</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Git</span>
+          <span class="skill-tag">GitHub</span>
+          <span class="skill-tag">VS Code</span>
+          <span class="skill-tag">Terminal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROYECTOS -->
+<section class="section" id="proyectos">
+  <div class="section-inner">
+    <p class="section-tag reveal">projects</p>
+    <h2 class="section-h2 reveal">Proyectos <em>reales</em>,<br>código real.</h2>
+    <div class="projects-list">
+      <a class="project-card reveal" href="https://brandon220.github.io/Automatizacion-de-Barberias/" target="_blank" rel="noopener">
+        <div>
+          <p class="project-index">001 — Featured</p>
+          <p class="project-title">Automatización de Barberías</p>
+          <p class="project-desc">
+            Sistema de reservas online que permite a una barbería gestionar citas las 24 horas sin intervención manual. El cliente elige servicio, barbero, fecha y horario — todo automatizado, sin llamadas ni mensajes.
+          </p>
+          <div class="project-tech">
+            <span class="tech-badge">HTML5</span>
+            <span class="tech-badge">CSS3</span>
+            <span class="tech-badge">JavaScript</span>
+            <span class="tech-badge">GitHub Pages</span>
+          </div>
+          <p class="project-status">
+            <span class="status-dot"></span>
+            Live — En producción
+          </p>
+        </div>
+        <div class="project-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / CONTACTO -->
+<section class="cta-section" id="contacto">
+  <div class="cta-inner">
+    <h2 class="cta-h2 reveal">¿Tienes una idea?<br>Hagámosla <span class="green">realidad.</span></h2>
+    <p class="cta-sub reveal">Estoy disponible para proyectos freelance, colaboraciones o simplemente para hablar de tecnología y seguridad.</p>
+    <div class="cta-links reveal">
+      <a href="https://github.com/Brandon220" target="_blank" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        Ver mi GitHub
+      </a>
+      <a href="https://brandon220.github.io/Automatizacion-de-Barberias/" target="_blank" class="btn btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Ver proyecto live
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <p class="footer-copy">// © 2026 Brandon García — Hecho con código</p>
+    <ul class="footer-nav">
+      <li><a href="https://github.com/Brandon220" target="_blank">GitHub</a></li>
+      <li><a href="#proyectos">Proyectos</a></li>
+      <li><a href="#sobre-mi">Sobre mí</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+// Particle canvas
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+const chars = '01アイウエオABCDEFabcdef{}[]<>/\\;:$#@';
+
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor(){this.reset(true)}
+  reset(init){
+    this.x = Math.random()*W;
+    this.y = init ? Math.random()*H : -20;
+    this.speed = 0.4 + Math.random()*0.8;
+    this.char = chars[Math.floor(Math.random()*chars.length)];
+    this.opacity = 0.1 + Math.random()*0.35;
+    this.size = 10 + Math.random()*4;
+    this.changeInterval = 60 + Math.floor(Math.random()*120);
+    this.tick = 0;
+  }
+  update(){
+    this.y += this.speed;
+    this.tick++;
+    if(this.tick % this.changeInterval === 0){
+      this.char = chars[Math.floor(Math.random()*chars.length)];
+    }
+    if(this.y > H+20) this.reset(false);
+  }
+  draw(){
+    ctx.globalAlpha = this.opacity;
+    ctx.fillStyle = '#00e5a0';
+    ctx.font = `${this.size}px 'Fira Code', monospace`;
+    ctx.fillText(this.char, this.x, this.y);
+  }
+}
+
+for(let i=0;i<60;i++) particles.push(new Particle());
+
+function animate(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{p.update();p.draw()});
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
